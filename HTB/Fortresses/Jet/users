@@ -1,0 +1,5 @@
+From /var/www/html/dirb_safe_dir_rf9EmcEIx/admin/db.php:
+	
+	$servername = "localhost";
+	$username = "jet";
+	$password = "dcr46kdl6zsld68idtyufldro";

@@ -1,0 +1,47 @@
+To get a dns from an ip just do
+
+# dig @ip-addr -x ip-addr
+
+Check for \\ regular expresions // on the "Profanity filer" section
+
+To find files with suid:
+
+#find / -perm -4000 2>/dev/null
+
+To analize a file with gdb-peda (The /home/leak file) (first download it to the local machine)
+
+# pattern_create 100 pattern
+# run < pattern
+# x/wx $rsp
+# pattern_offset 0x65414149
+
+Then execute exploit2.py on the local machine but before execute the next command on the jet machine
+
+# socat TCP-LISTEN:9999,reuseaddr,fork EXEC:/home/leak &
+
+And that's how you do a 'Buffer Overflow' attack
+
+
+To decrypt XOR encrypted files you need to find the 'key' first soooo:
+
+# xortools [-b | -c 20 | -c 00] [-m 64 | -l 17] encrypted.txt
+# cat encrypted.txt | xor.py 'secretkey-to-decrypt'
+
+To get the private.crt from openssl use RsaCtfTool
+
+# python3 RsaCtfTool.py --publickey /The/public/key/directory --private
+# openssl rsautl -decrypt -ssl -inkey private.crt -in key.bin.enc -out output
+# openssl aes-256-cbc -d -in secret.enc -pass file:output
+
+
+Tools Used:
+	xortool
+	xorpy
+	RsaCtfTool
+	Cutter
+
+
+
+
+
+https://gatogamer1155.github.io/hackthebox/jet/

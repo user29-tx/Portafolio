@@ -1,0 +1,23 @@
+Hello mate!
+
+First of all an important finding regarding our website: Login is prone to SQL injection! Ask the developers to fix it asap!
+
+Regarding your training material, I added the two binaries for the remote exploitation training in exploitme.zip. The password is the same we use to encrypt our communications.
+Make sure those binaries are kept safe!
+
+To make your life easier I have already spawned instances of the vulnerable binaries listening on our server.
+
+The ports are 5555 and 7777.
+Have fun and keep it safe!
+
+JET{r3p3at1ng_ch4rs_1n_s1mpl3_x0r_g3ts_y0u_0wn3d}
+
+
+Cheers - Alex
+
+-----------------------------------------------------------------------------
+This email and any files transmitted with it are confidential and intended solely for the use of the individual or entity to whom they are addressed. If you have received this email in error please notify the system manager. This message contains confidential information and is intended only for the individual named. If you are not the named addressee you should not disseminate, distribute or copy this e-mail. Please notify the sender immediately by e-mail if you have received this e-mail by mistake and delete this e-mail from your system. If you are not the intended recipient you are notified that disclosing, copying, distributing or taking any action in reliance on the contents of this information is strictly prohibited.
+-----------------------------------------------------------------------------
+
+
+(The XOR key to decrypt is "securewebincrocks")
