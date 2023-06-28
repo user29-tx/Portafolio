@@ -1,0 +1,22 @@
+# Nmap 7.92 scan initiated Mon Jul 11 19:00:23 2022 as: nmap -sC -sV -o nmap.acute.txt 10.10.11.145
+Nmap scan report for 10.10.11.145
+Host is up (0.23s latency).
+Not shown: 999 filtered tcp ports (no-response)
+PORT    STATE SERVICE  VERSION
+443/tcp open  ssl/http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| ssl-cert: Subject: commonName=atsserver.acute.local
+| Subject Alternative Name: DNS:atsserver.acute.local, DNS:atsserver
+| Not valid before: 2022-01-06T06:34:58
+|_Not valid after:  2030-01-04T06:34:58
+|_ssl-date: 2022-07-12T00:04:58+00:00; +1h03m39s from scanner time.
+| tls-alpn: 
+|_  http/1.1
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+|_clock-skew: 1h03m38s
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Mon Jul 11 19:01:21 2022 -- 1 IP address (1 host up) scanned in 58.12 seconds

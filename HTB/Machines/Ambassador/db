@@ -1,0 +1,23 @@
+;type = sqlite3
+;host = 127.0.0.1:3306
+;name = grafana
+;user = root
+
+db: grafana
+passwd: dontStandSoCloseToMe63221!
+
+mysql -h ambassador.htb -u grafana -p
+
+
+grafana.db
+
+admin-usr:  admin
+admin-passwd:  messageInABottle685427
+secret-key: SW2YcwTIb9zpOOhoPsMm
+
+ssh user:
+
+user: developer
+passwd: anEnglishManInNewYork027468
+
+token: bb03b43b-1d81-d62b-24b5-39540ee469b5
