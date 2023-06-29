@@ -1,6 +1,6 @@
 # Portafolio
 Hi, my name is Arturo Garcia, I'm a self-taught pentester and passionate about technology.
-Here you can see some of the thing's i've working on, but mostly writeups of the machines, challenges, and fortress I complete from Hackthebox.
+Here you can see some of the thing's i've working on, but mostly some writeups of the machines, challenges, and fortress I complete from Hackthebox.
 
 I'm currently studying college and for CCNA1 Cisco certificate, and with plans on getting an Offsec certification.
 
