@@ -1,0 +1,7 @@
+ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f : password123
+
+users:
+gia@snippet.htb
+juliana@snippet.htb
+letha@snippet.htb
+fredrick@snippet.htb

