@@ -1,0 +1,16 @@
+Use git command to check the full project
+
+# git branch		//To check different branches
+# git log		//To check different logs
+# git checkout [the branch]	//To switch between the different branches
+
+LFI:
+	Check 'os.path.join' vulnerabilities
+
+
+How to use Chisel:
+
+# sudo ./chisel server --port [the port] -v --reversse --socks5		//ON THE ATTACKER MACHINE
+# ./chisel client [local-ip:port] R:5000:socks		//ON THE VICTIM MACHINE
+
+https://medium.com/geekculture/chisel-network-tunneling-on-steroids-a28e6273c683
