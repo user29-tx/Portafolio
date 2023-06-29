@@ -1,0 +1,12 @@
+10.10.11.124:623 - IPMI - IPMI-2.0 UserAuth(auth_msg, auth_user, non_null_user) PassAuth(password, md5, md2, null) Level(1.5, 2.0)
+
+ilovepumkinpie1:Administrator
+
+3e23404f75ff7b8b668d8a3a7474fd48
+d280fe1fcb527f4d6e9a4d783b1050ed
+
+ DBUser=
+DBUser=zabbix
+### Option: DBPassword
+DBPassword=bloooarskybluh
+

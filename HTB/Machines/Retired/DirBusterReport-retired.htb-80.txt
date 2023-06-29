@@ -1,0 +1,41 @@
+DirBuster 1.0-RC1 - Report
+http://www.owasp.org/index.php/Category:OWASP_DirBuster_Project
+Report produced on Sun Apr 17 21:35:22 EDT 2022
+--------------------------------
+
+http://retired.htb:80
+--------------------------------
+Directories found during testing:
+
+Dirs found with a 302 response:
+
+/
+
+Dirs found with a 403 response:
+
+/assets/
+/assets/img/
+/js/
+/assets/img/about/
+/assets/img/logos/
+/css/
+/assets/img/team/
+
+
+--------------------------------
+Files found during testing:
+
+Files found with a 302 responce:
+
+/index.php
+
+Files found with a 200 responce:
+
+/default.html
+/assets/img/navbar-logo.svg
+/js/scripts.js
+/beta.html
+/activate_license.php
+
+
+--------------------------------

